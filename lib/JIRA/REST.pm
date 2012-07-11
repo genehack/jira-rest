@@ -2,7 +2,9 @@ package JIRA::REST;
 use Moose;
 # ABSTRACT: Alternative Jira REST client
 
+use File::ShareDir    qw/ dist_file /;
 use Net::HTTP::Spore;
+use Try::Tiny;
 
 =head1 DESCRIPTION
 
@@ -29,6 +31,24 @@ library also currently implements more of the JIRA REST API.
 
 =cut
 
+has 'spore_file' => (
+  is => 'ro' ,
+  isa => 'Str' ,
+  default => sub {
+    my $file;
+    try { $file = dist_file( 'JIRA-REST' , 'jira.json' ) }
+    catch {
+      ## grumble grumble File::Share doesn't play well with dzil...yet.
+      if ( $ENV{HARNESS_ACTIVE} and -e 'share/jira.json' ) {
+        $file = 'share/jira.json'
+      }
+      else { die "Can't find SPORE definition file"; }
+    };
+
+    return $file;
+  } ,
+);
+
 has '_client' => (
   is      => 'rw',
   lazy    => 1,
@@ -49,129 +69,8 @@ has '_client' => (
   default => sub {
     my $self = shift;
 
-    ### FIXME externalize JSON
-    my $client = Net::HTTP::Spore->new_from_string(
-      '{
-                "name": "JIRA",
-                "authority": "GITHUB:gphat",
-                "version": "1.0",
-                "methods": {
-                    "get_issue": {
-                        "path": "/rest/api/latest/issue/:id",
-                        "required_params": [
-                            "id"
-                        ],
-                        "optional_params": [
-                            "expand"
-                        ],
-                        "method": "GET",
-                        "authentication": true
-                    },
-                    "get_issue_createmeta": {
-                        "path": "/rest/api/latest/issue/createmeta",
-                        "optional_params": [
-                            "expand",
-                            "projectIds",
-                            "projectKeys",
-                            "issuetypeIds",
-                            "issuetypeNames"
-                        ],
-                        "method": "GET",
-                        "authentication": true
-                    },
-                    "get_issue_transitions": {
-                        "path": "/rest/api/latest/issue/:id/transitions",
-                        "required_params": [
-                            "id"
-                        ],
-                        "optional_params": [
-                            "expand"
-                        ],
-                        "method": "GET",
-                        "authentication": true
-                    },
-                    "get_issue_votes": {
-                        "path": "/rest/api/latest/issue/:id/votes",
-                        "required_params": [
-                            "id"
-                        ],
-                        "optional_params": [
-                            "expand"
-                        ],
-                        "method": "GET",
-                        "authentication": true
-                    },
-                    "get_issue_watchers": {
-                        "path": "/rest/api/latest/issue/:id/watchers",
-                        "required_params": [
-                            "id"
-                        ],
-                        "optional_params": [
-                            "expand"
-                        ],
-                        "method": "GET",
-                        "authentication": true
-                    },
-                    "get_project": {
-                        "path": "/rest/api/latest/project/:key",
-                        "required_params": [
-                            "key"
-                        ],
-                        "method": "GET",
-                        "authentication": true
-                    },
-                    "get_project_versions": {
-                        "path": "/rest/api/latest/project/:key/versions",
-                        "required_params": [
-                            "key"
-                        ],
-                        "method": "GET",
-                        "authentication": true
-                    },
-                    "get_version": {
-                        "path": "/rest/api/latest/version/:id",
-                        "required_params": [
-                            "id"
-                        ],
-                        "method": "GET",
-                        "authentication": true
-                    },
-                    "unvote_for_issue": {
-                        "path": "/rest/api/latest/issue/:id/votes",
-                        "required_params": [
-                            "id"
-                        ],
-                        "method": "DELETE",
-                        "authentication": true
-                    },
-                    "unwatch_issue": {
-                        "path": "/rest/api/latest/issue/:id/watchers",
-                        "required_params": [
-                            "id",
-                            "username"
-                        ],
-                        "method": "DELETE",
-                        "authentication": true
-                    },
-                    "vote_for_issue": {
-                        "path": "/rest/api/latest/issue/:id/votes",
-                        "required_params": [
-                            "id"
-                        ],
-                        "method": "POST",
-                        "authentication": true
-                    },
-                    "watch_issue": {
-                        "path": "/rest/api/latest/issue/:id/watchers",
-                        "required_params": [
-                            "id",
-                            "username"
-                        ],
-                        "method": "POST",
-                        "authentication": true
-                    }
-                }
-            }',
+    my $client = Net::HTTP::Spore->new_from_spec(
+      $self->spore_file ,
       base_url => $self->base_url,
       trace    => $self->debug,
     );
