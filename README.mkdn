@@ -1,0 +1,99 @@
+# NAME
+
+JIRA::REST - Alternative Jira REST client
+
+# VERSION
+
+version 0.01
+
+# SYNOPSIS
+
+    use JIRA::REST;
+
+    my $client = JIRA::REST->new(
+        username => 'username',
+        password => 'password',
+        base_url => 'http://jira.mycompany.com',
+    );
+    my $issue = $client->get_issue( id => 'TICKET-12');
+    print $issue->{fields}{priority}{value}{name}."\n";
+
+# DESCRIPTION
+
+JIRA::REST is a wrapper for the [JIRA REST API](http://docs.atlassian.com/jira/REST/latest/).  It is a thin wrapper,
+returning decoded version of the JSON without any munging or mangling.
+
+# ATTRIBUTES
+
+## password
+
+Set/Get the password to use when connecting to JIRA.
+
+## base\_url
+
+Set/Get the URL for the JIRA instance.
+
+## username
+
+Set/Get the username to use when connecting to JIRA.
+
+# METHODS
+
+## get\_issue( %args )
+
+Get the issue with the supplied id.  Returns a HashRef of data.
+
+## get\_issue\_createmeta( %args )
+
+Get the meta data (required and optional fields, etc.) for creating issues.
+
+## get\_issue\_transitions( %args )
+
+Get the transitions possible for this issue by the current user.
+
+## get\_issue\_votes( %args )
+
+Get voters on the issue.
+
+## get\_issue\_watchers( %args )
+
+Get watchers on the issue.
+
+## get\_project( %args )
+
+Get the project for the specifed key.
+
+## get\_project\_versions( %args )
+
+Get the versions for the project with the specified key.
+
+## get\_version( %args )
+
+Get the version with the specified id.
+
+## unvote\_for\_issue( %args )
+
+Remove your vote from an issue.
+
+## unwatch\_issue( %args )
+
+Remove a watcher from an issue.
+
+## vote\_for\_issue( %args )
+
+Cast your vote in favor of an issue.
+
+## watch\_issue( %args )
+
+Watch an issue. (Or have someone else watch it.)
+
+# AUTHOR
+
+John SJ Anderson <john.anderson@iinteractive.com>
+
+# COPYRIGHT AND LICENSE
+
+This software is copyright (c) 2012 by Infinity Interactive.
+
+This is free software; you can redistribute it and/or modify it under
+the same terms as the Perl 5 programming language system itself.
