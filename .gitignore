@@ -1,0 +1,3 @@
+.build
+JIRA-REST-*
+!releases/*.tar.gz
