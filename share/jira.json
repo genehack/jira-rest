@@ -3,6 +3,17 @@
     "authority": "GITHUB:genehack",
     "version": "1.0",
     "methods": {
+        "create_issue": {
+            "path": "/rest/api/latest/issue/",
+            "required_params": [
+                "fields"
+            ],
+            "form-data": {
+                "fields" : ":fields"
+            },
+            "method": "POST",
+            "authentication": true
+        },
         "get_issue": {
             "path": "/rest/api/latest/issue/:id",
             "required_params": [

@@ -53,6 +53,7 @@ has '_client' => (
   is      => 'rw',
   lazy    => 1,
   handles => [ qw/
+                   create_issue
                    get_issue
                    get_issue_createmeta
                    get_issue_transitions
