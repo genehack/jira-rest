@@ -16,9 +16,10 @@ API|http://docs.atlassian.com/jira/REST/latest/>.  It is a thin wrapper,
 returning the decoded version of the JSON without any munging or mangling.
 
 JIRA::REST is *heavily* based upon L<JIRA::Client::REST>. The primary
-difference is that the latter library uses a positional argument convention in
-method calls, where as this libraries uses a named argument convention. This
-library also currently implements more of the JIRA REST API.
+difference is that the latter library uses L<Net::HTTP::Spore>, and this
+library just uses L<LWP> directly. Additionally, this library has more
+flexible and (IMO) more sane method signatures. Finally, this library also
+currently implements more of the JIRA REST API than L<JIRA::Client::REST>
 
 =head1 SYNOPSIS
 
@@ -29,7 +30,7 @@ library also currently implements more of the JIRA REST API.
         password => 'password',
         base_url => 'http://jira.mycompany.com',
     );
-    my $issue = $client->get_issue( id => 'TICKET-12');
+    my $issue = $client->get_issue( 'TICKET-12' );
     print $issue->{fields}{priority}{value}{name}."\n";
 
 =cut
