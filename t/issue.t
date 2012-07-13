@@ -13,37 +13,63 @@ my $client = JIRA::REST->new(
     debug    => $ENV{JIRA_REST_DEBUG} ,
 );
 
-my $issue = $client->get_issue( id => 'TESTING-39');
-cmp_ok($issue->body->{fields}{priority}{name}, 'eq', 'Minor', 'get_issue');
+my $issue = $client->get_issue('TESTING-39' );
+cmp_ok($issue->{fields}{priority}{name}, 'eq', 'Minor', 'get_issue');
 
-my $trans = $client->get_issue_transitions( id => 'TESTING-39');
-my( $stop_trans ) = grep { $_->{id} == 761 } @{ $trans->body->{transitions} };
+my $create_meta = $client->get_issue_createmeta();
+my( $test_proj ) = grep { $_->{key} eq 'TESTING' } @{ $create_meta->{projects} };
+cmp_ok( $test_proj->{name} , 'eq' , 'TESTING' , 'get_issue_createmeta' );
+
+my $trans = $client->get_issue_transitions( 'TESTING-39' );
+my( $stop_trans ) = grep { $_->{id} == 761 } @{ $trans->{transitions} };
 cmp_ok( $stop_trans->{name} , 'eq' , 'Stop Progress', 'get_issue_transitions');
 
-my $votes = $client->get_issue_votes( id => 'TESTING-39');
-cmp_ok($votes->body->{votes}, '==', 0, 'get_issue_votes');
+my $votes = $client->get_issue_votes( 'TESTING-39' );
+cmp_ok($votes->{votes}, '==', 0, 'get_issue_votes');
 
 cmp_ok(
-  $client->vote_for_issue( id => 'TESTING-39')->status,
+  $client->vote_for_issue( 'TESTING-39')->code,
   'eq', 204, 'vote_for_issue'
 );
 
 cmp_ok(
-  $client->unvote_for_issue( id => 'TESTING-39')->status,
+  $client->unvote_for_issue( 'TESTING-39')->code,
   'eq', 204, 'unvote_for_issue'
 );
 
-my $watchers = $client->get_issue_watchers( id => 'TESTING-39' );
-cmp_ok($watchers->body->{watchCount}, '==', 0, 'get_issue_watchers');
+my $watchers = $client->get_issue_watchers( 'TESTING-39' );
+cmp_ok($watchers->{watchCount}, '==', 0, 'get_issue_watchers');
 
 cmp_ok(
-  $client->watch_issue( id => 'TESTING-1', username => 'cory.watson')->status,
+  $client->watch_issue({ id => 'TESTING-39', username => 'john.anderson' })->code,
   '==', 204, 'watch_issue'
 );
 
+$watchers = $client->get_issue_watchers( 'TESTING-39' );
+cmp_ok($watchers->{watchCount}, '==', 1, 'get_issue_watchers');
+
 cmp_ok(
-  $client->unwatch_issue( id => 'TESTING-1', username => 'cory.watson')->status,
+  $client->unwatch_issue({ id => 'TESTING-39', username => 'john.anderson' })->code,
   '==', 204, 'unwatch_issue'
 );
+
+$watchers = $client->get_issue_watchers( 'TESTING-39' );
+cmp_ok($watchers->{watchCount}, '==', 0, 'get_issue_watchers');
+
+cmp_ok(
+  $client->watch_issue( 'TESTING-39' )->code,
+  '==', 204, 'watch_issue'
+);
+
+$watchers = $client->get_issue_watchers( 'TESTING-39' );
+cmp_ok($watchers->{watchCount}, '==', 1, 'get_issue_watchers');
+
+cmp_ok(
+  $client->unwatch_issue( 'TESTING-39' )->code,
+  '==', 204, 'unwatch_issue'
+);
+
+$watchers = $client->get_issue_watchers( 'TESTING-39' );
+cmp_ok($watchers->{watchCount}, '==', 0, 'get_issue_watchers');
 
 done_testing;

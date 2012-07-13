@@ -12,7 +12,7 @@ my $client = JIRA::REST->new(
     debug    => $ENV{JIRA_REST_DEBUG},
 );
 
-my $ver = $client->get_version( id => '10001' );
-cmp_ok($ver->body->{name}, 'eq', '0.04', 'version name');
+my $ver = $client->get_version( '10001' );
+cmp_ok($ver->{name}, 'eq', '0.04', 'version name');
 
 done_testing;

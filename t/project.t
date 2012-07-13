@@ -13,10 +13,10 @@ my $client = JIRA::REST->new(
     debug    => $ENV{JIRA_REST_DEBUG},
 );
 
-my $proj = $client->get_project( key => 'TESTING' );
-cmp_ok($proj->body->{name}, 'eq', 'TESTING', 'project name');
+my $proj = $client->get_project( 'TESTING' );
+cmp_ok($proj->{name}, 'eq', 'TESTING', 'project name');
 
-my $vers = $client->get_project_versions( key => 'TESTING' );
-ok(scalar(@{ $vers->body }) > 0, 'got versions');
+my $vers = $client->get_project_versions( 'TESTING' );
+ok(scalar(@{ $vers }) > 0, 'got versions');
 
 done_testing;
