@@ -273,6 +273,28 @@ sub get_version {
   return decode_json( $response->content );
 }
 
+=method search( %args )
+
+Search for issues
+
+=cut
+
+sub search {
+  my $self = shift;
+
+  my %args = _expand_args( \@_ );
+
+  my $response = $self->_send_request(
+    method => 'POST' ,
+    url    => _build_url( "search" ),
+    data   => encode_json \%args ,
+  );
+
+  my $results = decode_json( $response->content );
+  return $results->{issues}[0];
+
+}
+
 =method unvote_for_issue( %args )
 
 Remove your vote from an issue.
