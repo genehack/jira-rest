@@ -3,6 +3,7 @@ use Moose;
 # ABSTRACT: Alternative Jira REST client
 
 use Carp;
+use Data::Printer;
 use File::ShareDir    qw/ dist_file /;
 use HTTP::Request;
 use JSON;
@@ -113,6 +114,53 @@ has '_ua' => (
   default => sub { LWP::UserAgent->new() },
   handles => [ qw/ request / ] ,
 );
+
+=method create_issue( %args )
+
+Create an issue with the provided arguments. Returns the issue ID for the
+newly generated issue or throws an exception.
+
+Example:
+
+    my $new_issue_id = $client->create_issue(
+      fields => {
+        assignee    => { name => 'jira.username' } ,
+        project     => { key => 'PROJECTKEY' } ,
+        summary     => 'short summary' ,
+        description => 'long description' ,
+        issuetype   => { name => 'Type' } ,
+      },
+    );
+
+=cut
+
+sub create_issue {
+  my $self = shift;
+
+  my %args = _expand_args( \@_ );
+
+  my $response = $self->_send_request(
+    method => 'POST' ,
+    url    => _build_url( "issue" ) ,
+    data   => \%args ,
+  );
+
+  if ( $response->is_success and $response->message eq 'Created' ) {
+    my $data = decode_json( $response->content );
+
+    return $data->{key} if $data->{key};
+
+    # FIXME exceptions...
+    print STDERR
+      "ERROR: Got 'created' message for issue creation but did not get key for new issue!\n";
+    print STDERR p $data;
+    print STDERR "\n";
+    die;
+  }
+
+  # FIXME exceptions
+  die "Request failed."
+}
 
 =method get_issue( %args )
 
@@ -379,7 +427,10 @@ sub _send_request  {
   $req->authorization_basic( $self->username , $self->password );
   $req->content_type( 'application/json' );
 
-  $req->content( $args{data} ) if $args{data};
+  if( $args{data} ) {
+    my $json = encode_json $args{data};
+    $req->content( $json );
+  }
 
   ### FIXME check error and do ... something? on failed request.
   return $self->request( $req );
