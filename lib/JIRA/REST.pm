@@ -159,7 +159,9 @@ sub create_issue {
   }
 
   # FIXME exceptions
-  die "Request failed."
+  print STDERR "Request failed.";
+  print STDERR p $response;
+  die;
 }
 
 =method get_issue( %args )
