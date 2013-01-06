@@ -13,17 +13,19 @@ my $client = JIRA::REST->new(
     debug    => 1,
 );
 
-my $issue = $client->create_issue(
-#  content_type => 'application/json' ,
+my $issue_id = $client->create_issue(
   fields => {
-    project => { key => 'TESTING' } ,
-    summary => 'genehack test' ,
+    assignee    => { name => $ENV{JIRA_REST_USER} },
+    project     => { key => 'TESTING' } ,
+    summary     => 'genehack test' ,
     description => 'this is never gonna work' ,
-    issuetype => { name => 'Bug' } ,
+    issuetype   => { name => 'Bug' } ,
   },
 );
 
-use DDP;
-p $issue;
+like( $issue_id , qr/TESTING-\d+/ , 'expected return' );
+
+my $issue = $client->get_issue( $issue_id );
+is( $issue->{fields}{assignee}{name} , $ENV{JIRA_REST_USER} , 'expected user' );
 
 done_testing;

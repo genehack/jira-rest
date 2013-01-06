@@ -21,8 +21,8 @@ my( $test_proj ) = grep { $_->{key} eq 'TESTING' } @{ $create_meta->{projects} }
 cmp_ok( $test_proj->{name} , 'eq' , 'TESTING' , 'get_issue_createmeta' );
 
 my $trans = $client->get_issue_transitions( 'TESTING-39' );
-my( $stop_trans ) = grep { $_->{id} == 761 } @{ $trans->{transitions} };
-cmp_ok( $stop_trans->{name} , 'eq' , 'Stop Progress', 'get_issue_transitions');
+my( $stop_trans ) = grep { $_->{id} == 5 } @{ $trans->{transitions} };
+cmp_ok( $stop_trans->{name} , 'eq' , 'Ready For Review', 'get_issue_transitions');
 
 my $votes = $client->get_issue_votes( 'TESTING-39' );
 cmp_ok($votes->{votes}, '==', 0, 'get_issue_votes');
