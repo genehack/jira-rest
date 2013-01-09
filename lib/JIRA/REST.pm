@@ -464,21 +464,18 @@ sub _send_request  {
 sub _expand_args {
   my( $arg_list_ref , $param_ref ) = @_;
 
-  if ( $param_ref ) {
-    if ( @$param_ref and scalar @$arg_list_ref == 1 and ref $arg_list_ref->[0] ne 'HASH' ) {
+  ### FIXME allow multiple params?
+  if ( $param_ref and @$param_ref
+       and scalar @$arg_list_ref == 1 and ref $arg_list_ref->[0] ne 'HASH' ) {
       return ( $param_ref->[0] => $arg_list_ref->[0] );
-    }
   }
-  else {
-    if ( ref $arg_list_ref->[0] eq 'HASH' ) {
-      return %{ $arg_list_ref->[0] };
-    }
-    elsif ( @$arg_list_ref and scalar @$arg_list_ref %2 == 0 ) {
-      return @$arg_list_ref;
-    }
+  elsif ( ref $arg_list_ref->[0] eq 'HASH' ) {
+    return %{ $arg_list_ref->[0] };
   }
-
-  croak "Inappropriate arguments";
+  elsif ( @$arg_list_ref and scalar @$arg_list_ref %2 == 0 ) {
+    return @$arg_list_ref;
+  }
+  else { croak "Inappropriate arguments" }
 }
 
 __PACKAGE__->meta->make_immutable;

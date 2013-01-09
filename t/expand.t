@@ -16,7 +16,7 @@ is_deeply(
 );
 
 throws_ok { JIRA::REST::_expand_args( [ 1 ] ) }
-  qr/Inappropriate arguments/ , 'should die';
+  qr/Inappropriate arguments/ , 'single element arrayref without param list should die';
 
 is_deeply(
   { JIRA::REST::_expand_args( [ 1 , 2 ] ) } ,
@@ -24,8 +24,11 @@ is_deeply(
   'double arg without id argument gets hashed proper'
 );
 
-throws_ok { JIRA::REST::_expand_args( [ 1 , 2 ] , [ 'id '] ) }
-  qr/Inappropriate arguments/ , 'should die';
+is_deeply(
+  { JIRA::REST::_expand_args( [ 1 , 2 ] , [ 'id '] ) } ,
+  { 1 => 2 } ,
+  'double arg with id argument also gets hashed proper - id arg is ignored',
+);
 
 is_deeply(
   { JIRA::REST::_expand_args( [{ id => 1 }] ) } ,
@@ -39,8 +42,11 @@ is_deeply(
   'hashref arg without id argument gets hashed proper'
 );
 
-throws_ok { JIRA::REST::_expand_args( [{ id => 2 }] , [ 'id '] ) }
-  qr/Inappropriate arguments/ , 'should die';
+is_deeply(
+  { JIRA::REST::_expand_args( [{ id => 2 }] , [ 'foobar' ] ) } ,
+  { id => 2 } ,
+  'hashref arg with id argument also gets hashed proper - id arg is ignored'
+);
 
 
 done_testing;
