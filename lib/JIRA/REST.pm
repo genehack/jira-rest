@@ -332,16 +332,17 @@ Search for issues
 sub search {
   my $self = shift;
 
-  my %args = _expand_args( \@_ );
+  my %args = _expand_args( \@_ , [ 'jql' ]);
 
   my $response = $self->_send_request(
     method => 'POST' ,
     url    => _build_url( "search" ),
-    data   => encode_json \%args ,
+    data   => \%args ,
   );
 
   my $results = decode_json( $response->content );
-  return $results->{issues}[0];
+
+  return @{ $results->{issues} };
 
 }
 
