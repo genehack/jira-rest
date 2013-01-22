@@ -37,4 +37,17 @@ my $client = JIRA::REST->new(
 
 }
 
+{
+  my @issues = $client->search({
+    jql        => 'text ~ "testing"' ,
+    maxResults => 2 ,
+  });
+
+  is( scalar @issues , 2 , 'get 2 because of limit' );
+  foreach ( @issues ) {
+    my $desc = $_->{fields}{description};
+    like( $desc , qr/test/ , 'has test in description' );
+  }
+}
+
 done_testing;
