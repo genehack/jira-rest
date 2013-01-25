@@ -323,6 +323,28 @@ sub get_version {
   return decode_json( $response->content );
 }
 
+=method post_comment( %args )
+
+Post a comment on an issue
+
+=cut
+
+sub post_comment {
+  my $self = shift;
+
+  my %args = _expand_args( \@_ , [ 'id' ]);
+  my $id   = delete $args{id};
+
+  my $response = $self->_send_request(
+    method => 'POST' ,
+    url    => _build_url( "issue/$id/comment" ),
+    data   => \%args ,
+  );
+
+  return $response->is_success;
+
+}
+
 =method search( %args )
 
 Search for issues
