@@ -164,6 +164,27 @@ sub create_issue {
   die;
 }
 
+=method delete_issue_link( %args )
+
+Delete a link between two issues
+
+=cut
+
+sub delete_issue_link {
+  my $self = shift;
+
+  my %args = _expand_args( \@_ , [ 'linkId' ] );
+  my $id = delete $args{linkId};
+
+  my $response = $self->_send_request(
+    method => 'DELETE' ,
+    url    => _build_url( "issueLink/$id" ) ,
+  );
+
+  return $response->is_success;
+
+}
+
 =method get_issue( %args )
 
 Get the issue with the supplied id.  Returns a HashRef of data.
@@ -198,6 +219,23 @@ sub get_issue_createmeta {
   my $response = $self->_send_request(
     method => 'GET' ,
     url    => _build_url( 'issue/createmeta' , %args ),
+  );
+
+  return decode_json( $response->content );
+}
+
+=method get_issue_link_types()
+
+Get a list of all possible issue link types
+
+=cut
+
+sub get_issue_link_types {
+  my $self = shift;
+
+  my $response = $self->_send_request(
+    method => 'GET',
+    url    => _build_url( 'issueLinkType' ),
   );
 
   return decode_json( $response->content );
@@ -321,6 +359,28 @@ sub get_version {
   );
 
   return decode_json( $response->content );
+}
+
+=method link_issues( %args )
+
+Link together two issues
+
+=cut
+
+sub link_issues {
+  my $self = shift;
+
+  my %args = _expand_args( \@_ );
+
+  my $response = $self->_send_request(
+    method => 'POST' ,
+    url    => _build_url( 'issueLink' ) ,
+    data   => \%args ,
+  );
+
+  # ugh
+  return $response->is_success;
+
 }
 
 =method post_comment( %args )

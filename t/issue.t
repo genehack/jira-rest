@@ -72,4 +72,65 @@ cmp_ok(
 $watchers = $client->get_issue_watchers( 'TESTING-39' );
 cmp_ok($watchers->{watchCount}, '==', 0, 'get_issue_watchers');
 
+my $types = $client->get_issue_link_types();
+foreach ( @{ $types->{issueLinkTypes} } ) {
+  ok( defined $_->{id}   , 'link type has id' );
+  ok( defined $_->{name} , 'link type has name' );
+}
+
+# get issues, verify no links & bail if there are
+{
+  my $in_issue = $client->get_issue( 'TESTING-99' );
+  is( $in_issue->{key} , 'TESTING-99' , 'got -99' )
+    or BAIL_OUT( 'Unable to get TESTING-99' );
+  is( scalar @{ $in_issue->{fields}{issuelinks} } , 0 , 'no links' )
+    or BAIL_OUT( 'TESTING-99 has a link' );
+
+  my $out_issue = $client->get_issue( 'TESTING-100' );
+  is( $out_issue->{key} , 'TESTING-100' , 'got -100' )
+    or BAIL_OUT( 'Unable to get TESTING-100' );
+  is( scalar @{ $in_issue->{fields}{issuelinks} } , 0 , 'no links' )
+    or BAIL_OUT( 'TESTING-100 has a link' );
+}
+
+my $success = $client->link_issues(
+  type         => { name => 'Duplicate' } ,
+  inwardIssue  => { key  => 'TESTING-99' } ,
+  outwardIssue => { key  => 'TESTING-100' } ,
+);
+ok( $success , 'created link' );
+
+my $issue_id;
+# reget issues, verify link
+{
+  my $in_issue = $client->get_issue( 'TESTING-99' ) ;
+  is( scalar @{ $in_issue->{fields}{issuelinks} } , 1 , '1 link' );
+  is( $in_issue->{fields}{issuelinks}[0]{outwardIssue}{key} ,
+      'TESTING-100' , 'correct link' );
+
+  my $out_issue = $client->get_issue( 'TESTING-100' ) ;
+  is( scalar @{ $out_issue->{fields}{issuelinks} } , 1 , '1 link' );
+  is( $out_issue->{fields}{issuelinks}[0]{inwardIssue}{key} ,
+      'TESTING-99' , 'correct link' );
+
+  $issue_id = $in_issue->{fields}{issuelinks}[0]{id};
+}
+
+# delete link
+{
+  my $success = $client->delete_issue_link( $issue_id );
+  ok( $success , 'deleted link' );
+}
+
+# reget issues, verify no links
+{
+  my $in_issue = $client->get_issue( 'TESTING-99' );
+  is( scalar @{ $in_issue->{fields}{issuelinks} } , 0 , 'no links' );
+
+  my $out_issue = $client->get_issue( 'TESTING-100' );
+  is( scalar @{ $in_issue->{fields}{issuelinks} } , 0 , 'no links' );
+}
+
+
+
 done_testing;
