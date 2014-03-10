@@ -15,29 +15,72 @@ version 0.01
         password => 'password',
         base_url => 'http://jira.mycompany.com',
     );
-    my $issue = $client->get_issue( id => 'TICKET-12');
+    my $issue = $client->get_issue( 'TICKET-12' );
     print $issue->{fields}{priority}{value}{name}."\n";
 
 # DESCRIPTION
 
 JIRA::REST is a wrapper for the [JIRA REST API](http://docs.atlassian.com/jira/REST/latest/).  It is a thin wrapper,
-returning decoded version of the JSON without any munging or mangling.
+returning the decoded version of the JSON without any munging or mangling.
+
+JIRA::REST is \*heavily\* based upon [JIRA::Client::REST](https://metacpan.org/pod/JIRA::Client::REST). The primary
+difference is that the latter library uses [Net::HTTP::Spore](https://metacpan.org/pod/Net::HTTP::Spore), and this
+library just uses [LWP](https://metacpan.org/pod/LWP) directly. Additionally, this library has more
+flexible and (IMO) more sane method signatures. Finally, this library also
+currently implements more of the JIRA REST API than [JIRA::Client::REST](https://metacpan.org/pod/JIRA::Client::REST)
 
 # ATTRIBUTES
+
+## api\_prefix
+
+Set/Get the initial part of the URL for the JIRA instance
+
+Example: '/rest/api/latest/'
+
+Default: '/rest/api/latest/'
+
+## base\_url
+
+Set/Get the base host part of the URL for the JIRA instance.
+
+Example: 'https://jira.yourcompany.com'
+
+No default; required attribute.
+
+## debug
+
+Debug flag. Makes the copious outputs.
 
 ## password
 
 Set/Get the password to use when connecting to JIRA.
-
-## base\_url
-
-Set/Get the URL for the JIRA instance.
 
 ## username
 
 Set/Get the username to use when connecting to JIRA.
 
 # METHODS
+
+## create\_issue( %args )
+
+Create an issue with the provided arguments. Returns the issue ID for the
+newly generated issue or throws an exception.
+
+Example:
+
+    my $new_issue_id = $client->create_issue(
+      fields => {
+        assignee    => { name => 'jira.username' } ,
+        project     => { key => 'PROJECTKEY' } ,
+        summary     => 'short summary' ,
+        description => 'long description' ,
+        issuetype   => { name => 'Type' } ,
+      },
+    );
+
+## delete\_issue\_link( %args )
+
+Delete a link between two issues
 
 ## get\_issue( %args )
 
@@ -46,6 +89,10 @@ Get the issue with the supplied id.  Returns a HashRef of data.
 ## get\_issue\_createmeta( %args )
 
 Get the meta data (required and optional fields, etc.) for creating issues.
+
+## get\_issue\_link\_types()
+
+Get a list of all possible issue link types
 
 ## get\_issue\_transitions( %args )
 
@@ -70,6 +117,18 @@ Get the versions for the project with the specified key.
 ## get\_version( %args )
 
 Get the version with the specified id.
+
+## link\_issues( %args )
+
+Link together two issues
+
+## post\_comment( %args )
+
+Post a comment on an issue
+
+## search( %args )
+
+Search for issues
 
 ## unvote\_for\_issue( %args )
 
